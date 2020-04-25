@@ -2,7 +2,9 @@
 
 Included:
 - CTBot
+- NodeMCU Flasher Tool
 - ArduinoJson-5.13.1
+- Sketch
 
 Terimakasih kepada :
 - Tuhan Yang Maha Esa
