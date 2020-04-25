@@ -10,6 +10,8 @@ void setup(){
   Serial.begin(115200);
   pinMode(D7, OUTPUT);
   pinMode(D8, OUTPUT);
+  digitalWrite(D7, HIGH);
+  digitalWrite(D8, HIGH);
   tb.wifiConnect("Will Hijacked", "perdana2020"); //Sesuaikan dengan SSID dan kata sandi WiFi Anda.
   tb.setTelegramToken("1242440467:AAHs6n0g1WqPQqMdcjrK_kKsLFSA2Yn1V1M"); //Sesuaikan dengan token bot Telegram Anda.
   if (tb.testConnection()){
@@ -21,8 +23,6 @@ void setup(){
 }
 
 void loop(){
-  digitalWrite(D7, HIGH);
-  digitalWrite(D8, HIGH);
   TBMessage pesan;
   if(tb.getNewMessage(pesan)){
     Serial.print("Ada pesan masuk ");
@@ -32,20 +32,20 @@ void loop(){
       digitalWrite(D7, LOW);
       tb.sendMessage(pesan.sender.id, "LAMPU SEKARANG MENYALA");
     }
-    else if(pesan.text.equalsIgnoreCase("LAMPU OFF")){
+    if(pesan.text.equalsIgnoreCase("LAMPU OFF")){
       digitalWrite(D7, HIGH);
       tb.sendMessage(pesan.sender.id, "LAMPU SEKARANG MATI");
     }
     //automation kipas angin
-    else if(pesan.text.equalsIgnoreCase("KIPAS ON")){
+    if(pesan.text.equalsIgnoreCase("KIPAS ON")){
       digitalWrite(D8, LOW);
       tb.sendMessage(pesan.sender.id, "KIPAS ANGIN SEKARANG MENYALA");
     }
-    else if(pesan.text.equalsIgnoreCase("KIPAS OFF")){
+    if(pesan.text.equalsIgnoreCase("KIPAS OFF")){
       digitalWrite(D8, HIGH);
       tb.sendMessage(pesan.sender.id, "KIPAS ANGIN SEKARANG MATI");
     }
-    else if(pesan.text.equalsIgnoreCase("AUTOMATION")){
+    if(pesan.text.equalsIgnoreCase("AUTOMATION")){
       //LM35;
       int suhu1 = analogRead(pinLM35);
       float milliV = (suhu1/1024.0)*3300;
@@ -61,28 +61,25 @@ void loop(){
       Serial.println (" V");
       if (suhu > 30.00){
         digitalWrite(D8, LOW);
-        delay(20000);
+        tb.sendMessage(pesan.sender.id, "KIPAS ANGIN SEKARANG MENYALA. SUHU > 30 CELCIUS");
       }
       if (suhu < 30.00) {
         digitalWrite(D8, HIGH);
-        delay(0);
+        tb.sendMessage(pesan.sender.id, "KIPAS ANGIN SEKARANG MATI. SUHU < 30 CELCIUS");
       }
       if (tegangan_hasil < 5.00){
        digitalWrite(D7, LOW);
-       delay(20000);
+       tb.sendMessage(pesan.sender.id, "LAMPU SEKARANG MENYALA. TEGANGAN OUT < 5.00");
       }
       if (tegangan_hasil == 5.00){
         digitalWrite(D7, HIGH);
-        delay(0);
+        tb.sendMessage(pesan.sender.id, "LAMPU SEKARANG MATI. TEGANGAN OUT = 5.00");
+      }
+      if (suhu > 30.00 && tegangan_hasil < 5.00){
+        digitalWrite(D7, LOW);
+        digitalWrite(D8, LOW);  
+        tb.sendMessage(pesan.sender.id, "LAMPU DAN KIPAS ANGIN SEKARANG MENYALA. SUHU > 30 CELCIUS DAN VOLTASE OUT < 5.00");
       }
     }
-    else {
-        tb.sendMessage(pesan.sender.id, "PERINTAH YANG ANDA KIRIM SALAH");
-        tb.sendMessage(pesan.sender.id, "KETIK 'LAMPU ON' UNTUK MENYALAKAN LAMPU");
-        tb.sendMessage(pesan.sender.id, "KETIK 'LAMPU OFF' UNTUK MEMATIKAN LAMPU");
-        tb.sendMessage(pesan.sender.id, "KETIK 'KIPAS ON' UNTUK MENYALAKAN KIPAS ANGIN");
-        tb.sendMessage(pesan.sender.id, "KETIK 'KIPAS OFF' UNTUK MEMATIKAN KIPAS ANGIN");
-    }
   }
-  delay(500000);
 }
